@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced M3U Playlist Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            color: var(--success);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            color: #a1d6ff;
+        }
+        
+        .toolbar {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            height: fit-content;
+        }
+        
+        .panel-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            color: var(--success);
+        }
+        
+        .panel-title i {
+            margin-right: 10px;
+            color: var(--success);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 1.1rem;
+            color: #a1d6ff;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--success);
+            box-shadow: 0 0 0 3px rgba(77, 171, 247, 0.3);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 28px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            box-shadow: 0 4px 15px rgba(76, 201, 240, 0.3);
+        }
+        
+        .btn-success:hover {
+            background: #3bb5d8;
+            box-shadow: 0 6px 20px rgba(76, 201, 240, 0.4);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            box-shadow: 0 4px 15px rgba(247, 37, 133, 0.3);
+        }
+        
+        .btn-danger:hover {
+            background: #e91e63;
+            box-shadow: 0 6px 20px rgba(247, 37, 133, 0.4);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            box-shadow: 0 4px 15px rgba(248, 150, 30, 0.3);
+        }
+        
+        .btn-warning:hover {
+            background: #e07a0c;
+            box-shadow: 0 6px 20px rgba(248, 150, 30, 0.4);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .playlist-container {
+            max-height: 500px;
+            overflow-y: auto;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            margin-top: 20px;
+        }
+        
+        .playlist-item {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            border-left: 4px solid var(--primary);
+            position: relative;
+        }
+        
+        .playlist-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateX(5px);
+        }
+        
+        .channel-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--success);
+        }
+        
+        .channel-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .meta-item {
+            background: rgba(76, 201, 240, 0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .channel-url {
+            font-size: 0.95rem;
+            opacity: 0.8;
+            word-break: break-all;
+            color: #c2f0ff;
+            margin-bottom: 10px;
+            display: block;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+        
+        .item-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .test-btn {
+            background: rgba(76, 201, 240, 0.2);
+            color: var(--success);
+        }
+        
+        .test-btn:hover {
+            background: rgba(76, 201, 240, 0.3);
+        }
+        
+        .edit-btn {
+            background: rgba(248, 150, 30, 0.2);
+            color: var(--warning);
+        }
+        
+        .edit-btn:hover {
+            background: rgba(248, 150, 30, 0.3);
+        }
+        
+        .delete-btn {
+            background: rgba(247, 37, 133, 0.2);
+            color: var(--danger);
+        }
+        
+        .delete-btn:hover {
+            background: rgba(247, 37, 133, 0.3);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            opacity: 0.7;
+            color: #a1d6ff;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--success);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            color: #c2f0ff;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            opacity: 0.8;
+            font-size: 0.9rem;
+            color: #a1d6ff;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: var(--success);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateX(200%);
+            transition: transform 0.4s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: #1a1a2e;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            color: var(--light);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .test-container {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .test-video {
+            width: 100%;
+            height: 300px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .test-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .test-status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .status-loading {
+            background: rgba(248, 150, 30, 0.2);
+            color: var(--warning);
+        }
+        
+        .status-success {
+            background: rgba(76, 201, 240, 0.2);
+            color: var(--success);
+        }
+        
+        .status-error {
+            background: rgba(247, 37, 133, 0.2);
+            color: var(--danger);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .import-btn {
+            background: var(--warning);
+        }
+        
+        .import-btn:hover {
+            background: #e07a0c;
+        }
+        
+        .save-btn {
+            background: var(--success);
+        }
+        
+        .save-btn:hover {
+            background: #3bb5d8;
+        }
+        
+        .content-type-input {
+            text-transform: none !important;
+        }
+        
+        .url-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .url-container input {
+            flex: 1;
+        }
+        
+        .add-url-btn {
+            background: rgba(76, 201, 240, 0.2);
+            color: var(--success);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .add-url-btn:hover {
+            background: rgba(76, 201, 240, 0.3);
+        }
+        
+        .url-remove-btn {
+            background: rgba(247, 37, 133, 0.2);
+            color: var(--danger);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .url-remove-btn:hover {
+            background: rgba(247, 37, 133, 0.3);
+        }
+        
+        .backup-label {
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            color: #ffcc70;
+            font-weight: 500;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .panel-title {
+                font-size: 1.5rem;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+            
+            .url-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .url-container .add-url-btn,
+            .url-container .url-remove-btn {
+                width: 100%;
+                border-radius: 8px;
+                height: auto;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-tv"></i> Advanced M3U Playlist Editor</h1>
+            <p class="subtitle">Create, edit, and test your IPTV playlists with multiple backup links</p>
+            
+            <div class="toolbar">
+                <button class="btn import-btn" id="import-btn">
+                    <i class="fas fa-file-import"></i> Import M3U File
+                </button>
+                <button class="btn save-btn" id="save-btn">
+                    <i class="fas fa-save"></i> Save Playlist
+                </button>
+                <input type="file" id="file-input" class="file-input" accept=".m3u,.m3u8, .txt">
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="panel">
+                <h2 class="panel-title">
+                    <i class="fas fa-edit"></i> 
+                    <span id="form-title">Add New Stream</span>
+                </h2>
+                
+                <div class="form-group">
+                    <label for="title"><i class="fas fa-heading"></i> Channel Title</label>
+                    <input type="text" id="title" placeholder="e.g., Animax HD">
+                </div>
+                
+                <div class="form-group">
+                    <label for="logo"><i class="fas fa-image"></i> Logo URL</label>
+                    <input type="text" id="logo" placeholder="e.g., https://example.com/logo.png">
+                </div>
+                
+                <div class="form-group">
+                    <label for="group"><i class="fas fa-layer-group"></i> Group Title</label>
+                    <input type="text" id="group" placeholder="e.g., Anime">
+                </div>
+                
+                <div class="form-group">
+                    <label for="country"><i class="fas fa-globe"></i> Country</label>
+                    <input type="text" id="country" placeholder="e.g., Philippines">
+                </div>
+                
+                <div class="form-group">
+                    <label for="type"><i class="fas fa-film"></i> Content Type</label>
+                    <input type="text" id="type" class="content-type-input" placeholder="e.g., Anime Series, Movie, Sports">
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-link"></i> Primary Stream URL</label>
+                    <div class="url-container">
+                        <input type="text" class="stream-url" placeholder="e.g., http://example.com/primary.m3u8">
+                        <button class="add-url-btn" id="add-url-btn">+</button>
+                    </div>
+                    
+                    <span class="backup-label"><i class="fas fa-shield-alt"></i> Backup URLs (Click + to add more)</span>
+                    <div id="backup-urls-container">
+                        <!-- Backup URLs will be added here -->
+                    </div>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="add-btn" class="btn">
+                        <i class="fas fa-plus-circle"></i> Add to Playlist
+                    </button>
+                    <button id="update-btn" class="btn btn-success" style="display:none;">
+                        <i class="fas fa-sync-alt"></i> Update Stream
+                    </button>
+                    <button id="cancel-edit" class="btn btn-danger" style="display:none;">
+                        <i class="fas fa-times"></i> Cancel Edit
+                    </button>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="stream-count">0</div>
+                        <div class="stat-label">Streams</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="group-count">0</div>
+                        <div class="stat-label">Groups</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="size">0 KB</div>
+                        <div class="stat-label">Playlist Size</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2 class="panel-title">
+                    <i class="fas fa-list"></i> Your Playlist
+                </h2>
+                
+                <div class="playlist-container" id="playlist-container">
+                    <div class="empty-state">Your playlist is empty. Add your first stream or import an existing playlist!</div>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="download-btn" class="btn btn-success">
+                        <i class="fas fa-download"></i> Download M3U File
+                    </button>
+                    <button id="clear-btn" class="btn btn-danger">
+                        <i class="fas fa-trash-alt"></i> Clear Playlist
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Your M3U playlist is automatically saved in your browser. You can close and return anytime to continue editing.</p>
+        </footer>
+    </div>
+    
+    <!-- Stream Test Modal -->
+    <div class="modal" id="test-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-modal">&times;</button>
+            <h2 class="panel-title">
+                <i class="fas fa-video"></i> Stream Tester
+            </h2>
+            
+            <div class="test-container">
+                <div class="test-status status-loading" id="test-status">
+                    Loading stream...
+                </div>
+                
+                <div class="test-video">
+                    <video id="test-player" width="100%" height="100%" controls></video>
+                </div>
+                
+                <div class="test-controls">
+                    <button class="btn" id="stop-test">
+                        <i class="fas fa-stop"></i> Stop Test
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i> Stream added successfully!
+    </div>
+    
+    <script>
+        // DOM elements
+        const importBtn = document.getElementById('import-btn');
+        const fileInput = document.getElementById('file-input');
+        const saveBtn = document.getElementById('save-btn');
+        const addBtn = document.getElementById('add-btn');
+        const updateBtn = document.getElementById('update-btn');
+        const cancelEditBtn = document.getElementById('cancel-edit');
+        const downloadBtn = document.getElementById('download-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const playlistContainer = document.getElementById('playlist-container');
+        const notification = document.getElementById('notification');
+        const streamCount = document.getElementById('stream-count');
+        const groupCount = document.getElementById('group-count');
+        const sizeElement = document.getElementById('size');
+        const testModal = document.getElementById('test-modal');
+        const closeModal = document.getElementById('close-modal');
+        const testPlayer = document.getElementById('test-player');
+        const testStatus = document.getElementById('test-status');
+        const stopTestBtn = document.getElementById('stop-test');
+        const addUrlBtn = document.getElementById('add-url-btn');
+        const backupUrlsContainer = document.getElementById('backup-urls-container');
+        const formTitle = document.getElementById('form-title');
+        
+        // Initialize playlist
+        let playlist = JSON.parse(localStorage.getItem('m3uPlaylist')) || [];
+        let editingIndex = -1;
+        
+        // Initialize the app
+        updateCounters();
+        renderPlaylist();
+        
+        // Event listeners
+        importBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileImport);
+        saveBtn.addEventListener('click', savePlaylist);
+        addBtn.addEventListener('click', addNewStream);
+        updateBtn.addEventListener('click', updateStream);
+        cancelEditBtn.addEventListener('click', cancelEdit);
+        downloadBtn.addEventListener('click', downloadM3U);
+        clearBtn.addEventListener('click', clearPlaylist);
+        closeModal.addEventListener('click', closeTestModal);
+        stopTestBtn.addEventListener('click', closeTestModal);
+        addUrlBtn.addEventListener('click', addBackupUrl);
+        
+        // Add backup URL field
+        function addBackupUrl() {
+            const urlDiv = document.createElement('div');
+            urlDiv.className = 'url-container';
+            urlDiv.innerHTML = `
+                <input type="text" class="backup-url" placeholder="e.g., http://example.com/backup.m3u8">
+                <button class="url-remove-btn">−</button>
+            `;
+            backupUrlsContainer.appendChild(urlDiv);
+            
+            // Add event listener to remove button
+            urlDiv.querySelector('.url-remove-btn').addEventListener('click', function() {
+                urlDiv.remove();
+            });
+        }
+        
+        // Handle file import
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                parseM3UFile(content);
+                showNotification('Playlist imported successfully!');
+            };
+            reader.readAsText(file);
+        }
+        
+        // Parse imported M3U file
+        function parseM3UFile(content) {
+            const lines = content.split('\n');
+            playlist = [];
+            
+            let currentItem = {};
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                if (line.startsWith('#EXTINF:')) {
+                    // Parse metadata line
+                    const metaLine = line;
+                    const title = metaLine.split(',').pop() || 'Untitled Channel';
+                    
+                    // Extract attributes
+                    const tvgName = extractAttribute(metaLine, 'tvg-name');
+                    const tvgLogo = extractAttribute(metaLine, 'tvg-logo');
+                    const groupTitle = extractAttribute(metaLine, 'group-title');
+                    const videoType = extractAttribute(metaLine, 'video-type');
+                    const country = extractAttribute(metaLine, 'country');
+                    
+                    currentItem = {
+                        title: title,
+                        urls: [],
+                        logo: tvgLogo || '',
+                        group: groupTitle || 'General',
+                        country: country || '',
+                        type: videoType || 'TV'
+                    };
+                }
+                else if (line.startsWith('http')) {
+                    // Stream URL
+                    if (currentItem.urls) {
+                        currentItem.urls.push(line);
+                    } else {
+                        currentItem.urls = [line];
+                    }
+                    
+                    // If next line is not a URL, push the item
+                    if (i+1 >= lines.length || !lines[i+1].trim().startsWith('http')) {
+                        playlist.push(currentItem);
+                        currentItem = {};
+                    }
+                }
+            }
+            
+            // Save and render
+            localStorage.setItem('m3uPlaylist', JSON.stringify(playlist));
+            renderPlaylist();
+            updateCounters();
+        }
+        
+        // Helper to extract attributes
+        function extractAttribute(line, attrName) {
+            const regex = new RegExp(`${attrName}="([^"]*)"`);
+            const match = line.match(regex);
+            return match ? match[1] : '';
+        }
+        
+        // Save playlist to localStorage
+        function savePlaylist() {
+            localStorage.setItem('m3uPlaylist', JSON.stringify(playlist));
+            showNotification('Playlist saved successfully!');
+        }
+        
+        // Update counters
+        function updateCounters() {
+            streamCount.textContent = playlist.length;
+            
+            // Count unique groups
+            const groups = new Set(playlist.map(item => item.group));
+            groupCount.textContent = groups.size;
+            
+            // Calculate playlist size
+            const playlistString = generateM3UContent();
+            const sizeInKB = Math.round(playlistString.length / 1024);
+            sizeElement.textContent = `${sizeInKB} KB`;
+        }
+        
+        // Show notification
+        function showNotification(message) {
+            notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Render playlist items
+        function renderPlaylist() {
+            if (playlist.length === 0) {
+                playlistContainer.innerHTML = '<div class="empty-state">Your playlist is empty. Add your first stream or import an existing playlist!</div>';
+                return;
+            }
+            
+            playlistContainer.innerHTML = '';
+            
+            playlist.forEach((item, index) => {
+                const backupCount = item.urls.length > 1 ? item.urls.length - 1 : 0;
+                
+                const itemElement = document.createElement('div');
+                itemElement.className = 'playlist-item';
+                itemElement.innerHTML = `
+                    <div class="channel-title">${item.title}</div>
+                    <div class="channel-meta">
+                        <span class="meta-item">${item.group}</span>
+                        <span class="meta-item">${item.type}</span>
+                        <span class="meta-item">${item.country}</span>
+                        <span class="meta-item">${backupCount} backup links</span>
+                    </div>
+                    <div class="channel-url">${item.urls[0]}</div>
+                    <div class="item-actions">
+                        <button class="action-btn test-btn" data-index="${index}">
+                            <i class="fas fa-play-circle"></i> Test
+                        </button>
+                        <button class="action-btn edit-btn" data-index="${index}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="action-btn delete-btn" data-index="${index}">
+                            <i class="fas fa-trash-alt"></i> Remove
+                        </button>
+                    </div>
+                `;
+                playlistContainer.appendChild(itemElement);
+            });
+            
+            // Add event listeners
+            document.querySelectorAll('.test-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    testStream(index);
+                });
+            });
+            
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    editStream(index);
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    deleteStream(index);
+                });
+            });
+        }
+        
+        // Generate M3U content
+        function generateM3UContent() {
+            if (playlist.length === 0) return '';
+            
+            let content = '#EXTM3U\n';
+            let currentGroup = '';
+            
+            playlist.forEach(item => {
+                // Add group header if group changed
+                if (item.group !== currentGroup) {
+                    content += `#EXTGRP:${item.group}\n`;
+                    currentGroup = item.group;
+                }
+                
+                // Add channel metadata
+                content += `#EXTINF:-1 tvg-name="${item.title}" tvg-logo="${item.logo}" group-title="${item.group}" video-type="${item.type}" country="${item.country}",${item.title}\n`;
+                
+                // Add all URLs
+                item.urls.forEach(url => {
+                    content += `${url}\n`;
+                });
+            });
+            
+            return content;
+        }
+        
+        // Add new stream to playlist
+        function addNewStream() {
+            const title = document.getElementById('title').value.trim();
+            const logo = document.getElementById('logo').value.trim();
+            const group = document.getElementById('group').value.trim();
+            const country = document.getElementById('country').value.trim();
+            const type = document.getElementById('type').value.trim();
+            
+            // Get URLs
+            const primaryUrl = document.querySelector('.stream-url').value.trim();
+            const backupUrls = Array.from(document.querySelectorAll('.backup-url'))
+                .map(input => input.value.trim())
+                .filter(url => url);
+                
+            const urls = [primaryUrl, ...backupUrls];
+            
+            // Validate inputs
+            if (!title || !urls[0]) {
+                showNotification('Title and at least one URL are required!');
+                return;
+            }
+            
+            // Create new stream object
+            const newStream = {
+                title,
+                urls,
+                logo,
+                group,
+                country,
+                type
+            };
+            
+            // Add to playlist
+            playlist.push(newStream);
+            
+            // Save to localStorage
+            localStorage.setItem('m3uPlaylist', JSON.stringify(playlist));
+            
+            // Update UI
+            renderPlaylist();
+            updateCounters();
+            
+            // Show notification
+            showNotification(`"${title}" added to playlist!`);
+            
+            // Reset form
+            resetForm();
+        }
+        
+        // Edit a stream
+        function editStream(index) {
+            if (index >= 0 && index < playlist.length) {
+                editingIndex = index;
+                const stream = playlist[index];
+                
+                // Populate form
+                document.getElementById('title').value = stream.title;
+                document.getElementById('logo').value = stream.logo;
+                document.getElementById('group').value = stream.group;
+                document.getElementById('country').value = stream.country;
+                document.getElementById('type').value = stream.type;
+                
+                // Clear existing URL inputs
+                document.querySelector('.stream-url').value = stream.urls[0] || '';
+                backupUrlsContainer.innerHTML = '';
+                
+                // Add backup URLs
+                for (let i = 1; i < stream.urls.length; i++) {
+                    const urlDiv = document.createElement('div');
+                    urlDiv.className = 'url-container';
+                    urlDiv.innerHTML = `
+                        <input type="text" class="backup-url" value="${stream.urls[i]}">
+                        <button class="url-remove-btn">−</button>
+                    `;
+                    backupUrlsContainer.appendChild(urlDiv);
+                    
+                    // Add event listener to remove button
+                    urlDiv.querySelector('.url-remove-btn').addEventListener('click', function() {
+                        urlDiv.remove();
+                    });
+                }
+                
+                // Switch to edit mode
+                formTitle.textContent = "Edit Stream";
+                addBtn.style.display = 'none';
+                updateBtn.style.display = 'inline-flex';
+                cancelEditBtn.style.display = 'inline-flex';
+                
+                // Scroll to form
+                document.querySelector('.panel').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        // Update stream
+        function updateStream() {
+            if (editingIndex < 0) return;
+            
+            const title = document.getElementById('title').value.trim();
+            const logo = document.getElementById('logo').value.trim();
+            const group = document.getElementById('group').value.trim();
+            const country = document.getElementById('country').value.trim();
+            const type = document.getElementById('type').value.trim();
+            
+            // Get URLs
+            const primaryUrl = document.querySelector('.stream-url').value.trim();
+            const backupUrls = Array.from(document.querySelectorAll('.backup-url'))
+                .map(input => input.value.trim())
+                .filter(url => url);
+                
+            const urls = [primaryUrl, ...backupUrls];
+            
+            // Validate inputs
+            if (!title || !urls[0]) {
+                showNotification('Title and at least one URL are required!');
+                return;
+            }
+            
+            // Update stream object
+            playlist[editingIndex] = {
+                title,
+                urls,
+                logo,
+                group,
+                country,
+                type
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('m3uPlaylist', JSON.stringify(playlist));
+            
+            // Update UI
+            renderPlaylist();
+            updateCounters();
+            
+            // Show notification
+            showNotification(`"${title}" updated successfully!`);
+            
+            // Reset form
+            resetForm();
+        }
+        
+        // Cancel edit
+        function cancelEdit() {
+            resetForm();
+        }
+        
+        // Reset form to add mode
+        function resetForm() {
+            document.getElementById('title').value = '';
+            document.getElementById('logo').value = '';
+            document.getElementById('group').value = '';
+            document.getElementById('country').value = '';
+            document.getElementById('type').value = '';
+            document.querySelector('.stream-url').value = '';
+            backupUrlsContainer.innerHTML = '';
+            
+            formTitle.textContent = "Add New Stream";
+            addBtn.style.display = 'inline-flex';
+            updateBtn.style.display = 'none';
+            cancelEditBtn.style.display = 'none';
+            
+            editingIndex = -1;
+        }
+        
+        // Delete a stream
+        function deleteStream(index) {
+            if (index >= 0 && index < playlist.length) {
+                const title = playlist[index].title;
+                playlist.splice(index, 1);
+                localStorage.setItem('m3uPlaylist', JSON.stringify(playlist));
+                renderPlaylist();
+                updateCounters();
+                showNotification(`"${title}" removed from playlist!`);
+                
+                if (editingIndex === index) {
+                    resetForm();
+                }
+            }
+        }
+        
+        // Test a stream
+        function testStream(index) {
+            if (index >= 0 && index < playlist.length) {
+                const stream = playlist[index];
+                const testUrl = stream.urls[0]; // Test the primary URL
+                
+                // Show modal
+                testModal.style.display = 'flex';
+                testStatus.textContent = 'Loading stream...';
+                testStatus.className = 'test-status status-loading';
+                
+                // Set video source
+                testPlayer.src = testUrl;
+                
+                // Play the stream
+                testPlayer.play().then(() => {
+                    testStatus.textContent = 'Stream is working!';
+                    testStatus.className = 'test-status status-success';
+                }).catch(error => {
+                    testStatus.textContent = `Error: ${error.message || 'Stream could not be played'}`;
+                    testStatus.className = 'test-status status-error';
+                });
+            }
+        }
+        
+        // Close test modal
+        function closeTestModal() {
+            testModal.style.display = 'none';
+            testPlayer.pause();
+            testPlayer.src = '';
+        }
+        
+        // Download M3U file
+        function downloadM3U() {
+            if (playlist.length === 0) {
+                showNotification('Playlist is empty!');
+                return;
+            }
+            
+            const content = generateM3UContent();
+            const blob = new Blob([content], { type: 'application/x-mpegurl' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'my_playlist.m3u';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('M3U file downloaded!');
+        }
+        
+        // Clear playlist
+        function clearPlaylist() {
+            if (playlist.length === 0) return;
+            
+            if (confirm('Are you sure you want to clear the entire playlist?')) {
+                playlist = [];
+                localStorage.removeItem('m3uPlaylist');
+                renderPlaylist();
+                updateCounters();
+                showNotification('Playlist cleared!');
+                resetForm();
+            }
+        }
+        
+        // Initialize with sample data if empty
+        if (playlist.length === 0) {
+            playlist = [
+                {
+                    title: "Animax HD",
+                    urls: [
+                        "http://example.com/animax_primary.m3u8",
+                        "http://backup1.com/animax.m3u8",
+                        "http://backup2.com/animax_stream.m3u8"
+                    ],
+                    logo: "https://upload.wikimedia.org/wikipedia/commons/6/65/Animaxlogo-20160701.png",
+                    group: "Anime",
+                    country: "Philippines",
+                    type: "Anime Series"
+                },
+                {
+                    title: "Sports Action",
+                    urls: [
+                        "http://example.com/sports_primary.m3u8",
+                        "http://backup1.com/sports_stream.m3u8"
+                    ],
+                    logo: "https://example.com/sports.png",
+                    group: "Sports",
+                    country: "International",
+                    type: "Live Sports"
+                }
+            ];
+            localStorage.setItem('m3uPlaylist', JSON.stringify(playlist));
+            renderPlaylist();
+            updateCounters();
+        }
+    </script>
+</body>
+</html>
